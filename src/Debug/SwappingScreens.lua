@@ -24,12 +24,10 @@ return function(window)
 	for i = 1, 10 do
 		screen1.Visible = true
 		screen2.Visible = false
-		Runtime.Draw(screen1)
 		sleep(1)
 
 		screen1.Visible = false
 		screen2.Visible = true
-		Runtime.Draw(screen2)
 		sleep(1)
 	end
 end

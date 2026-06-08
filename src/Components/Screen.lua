@@ -2,7 +2,8 @@ local Component = require("UISDK/Primitives/Component")
 local Vector2 = require("UISDK/Primitives/Vector2")
 
 local Screen = {}
-Screen.__index = Screen
+Screen.__index = Component.CreateIndex(Screen)
+Screen.__newindex = Component.__newindex
 
 setmetatable(Screen, {
 	__index = Component,
@@ -20,6 +21,15 @@ function Screen:Unparent(component)
 			table.remove(self.Children, i)
 		end
 	end
+end
+
+function Screen:GetSize()
+	if self.Runtime then
+		local width, height = self.Runtime:GetSize()
+		return Vector2.new(width, height)
+	end
+
+	return Vector2.new()
 end
 
 function Screen:Draw(target)
@@ -44,12 +54,15 @@ end
 function Screen.new(runtime)
 	local self = Component.new()
 	setmetatable(self, Screen)
+	rawset(self, "_SuppressInvalidation", true)
 
 	self.Name = "Screen"
 	self.Visible = true
 	self.Position = Vector2.new(0, 0)
 	self.Runtime = runtime
 	self.Children = {}
+
+	rawset(self, "_SuppressInvalidation", nil)
 
 	return self
 end

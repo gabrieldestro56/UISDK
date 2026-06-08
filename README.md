@@ -23,7 +23,9 @@ Runtime.new(term.current())
 
 local screen = Runtime.Screen()
 
-Runtime.Draw(screen)
+local label = Runtime.TextLabel()
+label.Text = "Hello!"
+screen:Parent(label)
 ```
 
 For a monitor, pass the wrapped peripheral instead:
@@ -31,6 +33,16 @@ For a monitor, pass the wrapped peripheral instead:
 ```lua
 Runtime.new(peripheral.wrap("left"))
 ```
+
+Screens and components redraw automatically when reactive properties change:
+
+```lua
+screen.Visible = false
+screen.Visible = true
+label.Text = "Updated!"
+```
+
+If automatic redraw is disabled with `runtime.AutoDraw = false`, call `Runtime.Draw()` to redraw every visible screen.
 
 ## Regenerate Installer Dependencies
 

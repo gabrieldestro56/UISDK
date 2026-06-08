@@ -2,7 +2,8 @@ local Component = require("UISDK/Primitives/Component")
 local Vector2 = require("UISDK/Primitives/Vector2")
 
 local TextLabel = {}
-TextLabel.__index = TextLabel
+TextLabel.__index = Component.CreateIndex(TextLabel)
+TextLabel.__newindex = Component.__newindex
 
 setmetatable(TextLabel, {
 	__index = Component,
@@ -17,30 +18,33 @@ function TextLabel:Draw(target)
 		return
 	end
 
-	local parentPosition = self.Parent.Position
-
-	-- Offset position so its relative to parent
-	local goalX, goalY = self.Position.X + parentPosition.X, self.Position.Y + parentPosition.Y
+	local position = self:GetAbsolutePosition()
 
 	assert(target ~= nil, "TextLabel:Draw requires a terminal or monitor target")
 
-	target.setCursorPos(goalX, goalY)
+	target.setCursorPos(position.X, position.Y)
 	target.setTextColor(self.Color)
 	target.write(tostring(self.Text))
+end
+
+function TextLabel:GetSize()
+	return Vector2.new(#tostring(self.Text), 1)
 end
 
 function TextLabel.new()
 	local self = Component.new()
 	setmetatable(self, TextLabel)
+	rawset(self, "_SuppressInvalidation", true)
 
 	self.Name = "TextLabel"
 	self.Visible = true
 	self.Text = "Text"
 
-	self.Position = Vector2.new(1, 1)
 	self.Color = colors and colors.white or 1
 
 	self.Parent = nil
+
+	rawset(self, "_SuppressInvalidation", nil)
 
 	return self
 end

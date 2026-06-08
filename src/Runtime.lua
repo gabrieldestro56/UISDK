@@ -32,6 +32,10 @@ function Runtime.new(target)
 	local self = setmetatable({}, Runtime)
 
 	self.Target = target
+	self.Screens = {}
+	self.AutoDraw = true
+	self.Dirty = false
+	self._IsDrawing = false
 
 	runtimesByTarget[target] = self
 	currentRuntime = self
@@ -51,8 +55,19 @@ function Runtime.GetSize(runtime)
 	return resolveRuntime(runtime).Target.getSize()
 end
 
+function Runtime:AddScreen(screen)
+	assert(screen ~= nil and type(screen.Draw) == "function", "Runtime:AddScreen requires a drawable screen")
+
+	table.insert(self.Screens, screen)
+	screen.Runtime = self
+	self:Invalidate(screen)
+
+	return screen
+end
+
 function Runtime.Screen(runtime)
-	return Screen.new(resolveRuntime(runtime))
+	local runtimeInstance = resolveRuntime(runtime)
+	return runtimeInstance:AddScreen(Screen.new(runtimeInstance))
 end
 
 function Runtime.TextLabel()
@@ -71,6 +86,17 @@ function Runtime.Clear(runtime)
 	end
 end
 
+function Runtime:Invalidate()
+	local runtime = resolveRuntime(self)
+	runtime.Dirty = true
+
+	if runtime.AutoDraw == false or runtime._IsDrawing then
+		return
+	end
+
+	Runtime.Draw(runtime)
+end
+
 function Runtime.Draw(runtimeOrScreen, maybeScreen)
 	local isRuntimeCall = getmetatable(runtimeOrScreen) == Runtime or runtimeOrScreen == Runtime
 	local runtime = nil
@@ -83,9 +109,30 @@ function Runtime.Draw(runtimeOrScreen, maybeScreen)
 		runtime = screen and screen.Runtime or resolveRuntime()
 	end
 
-	assert(screen ~= nil and type(screen.Draw) == "function", "Runtime:Draw requires a drawable screen")
-	Runtime.Clear(runtime)
-	screen:Draw(runtime.Target)
+	runtime._IsDrawing = true
+
+	local success, drawError = pcall(function()
+		Runtime.Clear(runtime)
+
+		if screen then
+			assert(type(screen.Draw) == "function", "Runtime:Draw requires a drawable screen")
+			screen:Draw(runtime.Target)
+		else
+			for _, visibleScreen in ipairs(runtime.Screens) do
+				if visibleScreen.Visible and type(visibleScreen.Draw) == "function" then
+					visibleScreen:Draw(runtime.Target)
+				end
+			end
+		end
+
+		runtime.Dirty = false
+	end)
+
+	runtime._IsDrawing = false
+
+	if not success then
+		error(drawError, 0)
+	end
 end
 
 return Runtime
