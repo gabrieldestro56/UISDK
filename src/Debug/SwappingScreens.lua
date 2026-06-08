@@ -1,0 +1,35 @@
+return function(window)
+	local Runtime = require("../Runtime")
+	local Vector2 = require("../Primitives/Vector2")
+
+	Runtime.new(window or term.current())
+
+	local screen1 = Runtime.Screen()
+
+	local text1 = Runtime.TextLabel()
+	text1.Text = "This is screen 1!"
+	text1.Color = colors.magenta
+	text1.Position = Vector2.new(1, 1)
+	screen1:Parent(text1)
+
+	local screen2 = Runtime.Screen()
+	screen2.Visible = false
+
+	local text2 = Runtime.TextLabel()
+	text2.Text = "This is screen 2!"
+	text2.Color = colors.magenta
+	text2.Position = Vector2.new(1, 1)
+	screen2:Parent(text2)
+
+	for i = 1, 10 do
+		screen1.Visible = true
+		screen2.Visible = false
+		Runtime.Draw(screen1)
+		sleep(1)
+
+		screen1.Visible = false
+		screen2.Visible = true
+		Runtime.Draw(screen2)
+		sleep(1)
+	end
+end

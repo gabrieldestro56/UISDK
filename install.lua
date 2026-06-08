@@ -1,7 +1,40 @@
 local dependencies = {
+	-- Primitives
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Primitives/Component.lua",
+		path = "UISDK/Primitives/Component",
+	},
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Primitives/Vector2.lua",
+		path = "UISDK/Primitives/Vector2",
+	},
+
+	-- Components
 	{
 		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Components/Screen.lua",
 		path = "UISDK/Components/Screen",
+	},
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Components/TextLabel.lua",
+		path = "UISDK/Components/TextLabel",
+	},
+
+	-- Debug
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Debug/SwappingScreens.lua",
+		path = "UISDK/Debug/SwappingScreens",
+	},
+
+	-- Runtime.lua
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Runtime.lua",
+		path = "UISDK/Runtime",
+	},
+
+	-- Utils
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Utils/PositionUtils.lua",
+		path = "UISDK/Utils/PositionUtils",
 	},
 }
 

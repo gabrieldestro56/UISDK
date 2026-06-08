@@ -10,7 +10,7 @@ function Component.new()
 
 	self.Name = "Component"
 	self.Visible = false
-	self.Parent = "root"
+	self.Parent = nil
 
 	self.Id = math.random(1, 999999999)
 
