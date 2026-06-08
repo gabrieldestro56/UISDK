@@ -6,11 +6,7 @@ local dependencies = {
 }
 
 local function downloadIfMissing(url, path)
-	if fs.exists(path) then
-		return
-	end
-
-	print("Missing " .. path .. ", downloading...")
+	print("[UISDK]" .. path .. " is being downloaded...")
 
 	local response = http.get(url)
 	if not response then
@@ -35,3 +31,5 @@ end
 for _, dep in ipairs(dependencies) do
 	downloadIfMissing(dep.url, dep.path)
 end
+
+print("[UISDK] Latest version installed")
