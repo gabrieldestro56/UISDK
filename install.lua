@@ -1,7 +1,7 @@
 local dependencies = {
 	{
-		url = "https://example.com/shop/inventory.lua",
-		path = "shop/inventory.lua",
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Components/Screen.lua",
+		path = "UISDK/Components/Screen",
 	},
 }
 
@@ -28,6 +28,8 @@ local function downloadIfMissing(url, path)
 	local file = fs.open(path, "w")
 	file.write(content)
 	file.close()
+
+	print("Downloaded " .. path .. " successfully.")
 end
 
 for _, dep in ipairs(dependencies) do
