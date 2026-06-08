@@ -25,7 +25,7 @@ local function downloadIfMissing(url, path)
 	file.write(content)
 	file.close()
 
-	print("Downloaded " .. path .. " successfully.")
+	print("[UISDK] Downloaded " .. path .. " successfully.")
 end
 
 for _, dep in ipairs(dependencies) do
@@ -33,3 +33,4 @@ for _, dep in ipairs(dependencies) do
 end
 
 print("[UISDK] Latest version installed")
+fs.delete(shell.getRunningProgram())
