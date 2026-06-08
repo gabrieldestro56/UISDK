@@ -1,25 +1,25 @@
 return function(window)
 	local Runtime = require("UISDK/Runtime")
 	local Vector2 = require("UISDK/Primitives/Vector2")
+	local e = Runtime.create
 
 	Runtime.new(window or term.current())
 
-	local screen1 = Runtime.Screen()
+	local screen1 = e("Screen", { Visible = true }, {
+		Text = e("TextLabel", {
+			Text = "This is screen 1!",
+			Color = colors.magenta,
+			Position = Vector2.new(1, 1),
+		})
+	})
 
-	local text1 = Runtime.TextLabel()
-	text1.Text = "This is screen 1!"
-	text1.Color = colors.magenta
-	text1.Position = Vector2.new(1, 1)
-	screen1:Parent(text1)
-
-	local screen2 = Runtime.Screen()
-	screen2.Visible = false
-
-	local text2 = Runtime.TextLabel()
-	text2.Text = "This is screen 2!"
-	text2.Color = colors.yellow
-	text2.Position = Vector2.new(1, 1)
-	screen2:Parent(text2)
+	local screen2 = e("Screen", { Visible = false }, {
+		Text = e("TextLabel", {
+			Text = "This is screen 2!",
+			Color = colors.yellow,
+			Position = Vector2.new(1, 1),
+		})
+	})
 
 	for i = 1, 10 do
 		screen1.Visible = true

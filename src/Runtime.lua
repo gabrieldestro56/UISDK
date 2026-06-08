@@ -21,6 +21,48 @@ local function resolveRuntime(runtime)
 	return currentRuntime
 end
 
+local function clearBounds(target, bounds)
+	if not bounds then
+		return
+	end
+
+	if type(target.setCursorPos) ~= "function" or type(target.write) ~= "function" then
+		return
+	end
+
+	local targetWidth, targetHeight = target.getSize()
+	local startX = math.max(1, bounds.X)
+	local startY = math.max(1, bounds.Y)
+	local endX = math.min(targetWidth, bounds.X + bounds.Width - 1)
+	local endY = math.min(targetHeight, bounds.Y + bounds.Height - 1)
+
+	if startX > endX or startY > endY then
+		return
+	end
+
+	local blankLine = string.rep(" ", endX - startX + 1)
+
+	for y = startY, endY do
+		target.setCursorPos(startX, y)
+		target.write(blankLine)
+	end
+end
+
+local function shouldDrawSourceOnly(source)
+	return source
+		and source.Name ~= "Screen"
+		and type(source.Draw) == "function"
+		and type(source.GetDrawBounds) == "function"
+end
+
+local function isComponentVisible(component)
+	if type(component.IsVisible) == "function" then
+		return component:IsVisible()
+	end
+
+	return component.Visible
+end
+
 function Runtime.new(target)
 	validateTarget(target)
 
@@ -74,6 +116,45 @@ function Runtime.TextLabel()
 	return TextLabel.new()
 end
 
+local componentRegistry = {
+	Screen = Screen,
+	TextLabel = TextLabel,
+}
+
+function Runtime.create(componentType, props, children)
+	local class = componentRegistry[componentType]
+	assert(class, "Unknown component type: " .. tostring(componentType))
+
+	local instance = class.new()
+	rawset(instance, "_SuppressInvalidation", true)
+
+	if props then
+		for k, v in pairs(props) do
+			instance[k] = v
+		end
+	end
+
+	if children and type(instance.Parent) == "function" then
+		for key, child in pairs(children) do
+			if type(key) == "string" then
+				local p = rawget(child, "_Properties")
+				if p then
+					p["Name"] = key
+				end
+			end
+			instance:Parent(child)
+		end
+	end
+
+	rawset(instance, "_SuppressInvalidation", nil)
+
+	if componentType == "Screen" then
+		resolveRuntime():AddScreen(instance)
+	end
+
+	return instance
+end
+
 function Runtime.Clear(runtime)
 	local target = resolveRuntime(runtime).Target
 
@@ -86,7 +167,7 @@ function Runtime.Clear(runtime)
 	end
 end
 
-function Runtime:Invalidate()
+function Runtime:Invalidate(source)
 	local runtime = resolveRuntime(self)
 	runtime.Dirty = true
 
@@ -94,7 +175,43 @@ function Runtime:Invalidate()
 		return
 	end
 
+	if shouldDrawSourceOnly(source) then
+		runtime:DrawComponent(source)
+		return
+	end
+
 	Runtime.Draw(runtime)
+end
+
+function Runtime:DrawComponent(component)
+	local runtime = resolveRuntime(self)
+	assert(component ~= nil and type(component.Draw) == "function", "Runtime:DrawComponent requires a drawable component")
+
+	runtime._IsDrawing = true
+
+	local success, drawError = pcall(function()
+		clearBounds(runtime.Target, rawget(component, "_LastDrawBounds"))
+		clearBounds(runtime.Target, component:GetDrawBounds())
+
+		if isComponentVisible(component) then
+			component:Draw(runtime.Target)
+			if type(component.CaptureDrawBounds) == "function" then
+				component:CaptureDrawBounds()
+			else
+				rawset(component, "_LastDrawBounds", component:GetDrawBounds())
+			end
+		else
+			rawset(component, "_LastDrawBounds", nil)
+		end
+
+		runtime.Dirty = false
+	end)
+
+	runtime._IsDrawing = false
+
+	if not success then
+		error(drawError, 0)
+	end
 end
 
 function Runtime.Draw(runtimeOrScreen, maybeScreen)

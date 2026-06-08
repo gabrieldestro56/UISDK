@@ -42,6 +42,8 @@ screen.Visible = true
 label.Text = "Updated!"
 ```
 
+Screen changes redraw every visible screen. Component changes, like `label.Text` or `label.Visible`, repaint just that component.
+
 If automatic redraw is disabled with `runtime.AutoDraw = false`, call `Runtime.Draw()` to redraw every visible screen.
 
 ## Regenerate Installer Dependencies

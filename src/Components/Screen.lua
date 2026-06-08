@@ -45,8 +45,16 @@ function Screen:Draw(target)
 	assert(drawTarget ~= nil, "Screen:Draw requires a terminal or monitor target")
 
 	for _, component in ipairs(self.Children) do
-		if component.Visible and type(component.Draw) == "function" then
+		local isVisible = component.Visible
+		if type(component.IsVisible) == "function" then
+			isVisible = component:IsVisible()
+		end
+
+		if isVisible and type(component.Draw) == "function" then
 			component:Draw(drawTarget)
+			if type(component.CaptureDrawBounds) == "function" then
+				component:CaptureDrawBounds()
+			end
 		end
 	end
 end

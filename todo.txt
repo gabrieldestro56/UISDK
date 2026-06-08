@@ -1,1 +1,15 @@
-1. Instead of calling Draw on a specific Screen on  Runtime, make it  so it Draws all visible screens
+local Runtime = require("UISDK/Runtime")
+local e = Runtime.create
+
+local function myComponent()
+    return e("Screen", {
+        Visible = true
+    }, {
+        Title = e("TextLabel", {
+            Text = "This is my screen!",
+            Color = colors.magenta,
+            Position = Vector2.new(10, 10),
+        })
+    })
+end 
+

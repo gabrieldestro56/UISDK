@@ -115,6 +115,18 @@ function Component:GetAbsolutePosition()
 	return anchoredPosition
 end
 
+function Component:GetDrawBounds()
+	local position = self:GetAbsolutePosition()
+	local size = self:GetSize()
+
+	return {
+		X = position.X,
+		Y = position.Y,
+		Width = size.X,
+		Height = size.Y,
+	}
+end
+
 function Component:GetRuntime()
 	local runtime = getProperty(self, "Runtime")
 	if runtime then
@@ -127,6 +139,23 @@ function Component:GetRuntime()
 	end
 
 	return nil
+end
+
+function Component:IsVisible()
+	if not self.Visible then
+		return false
+	end
+
+	local parent = getProperty(self, "Parent")
+	if parent and type(parent.IsVisible) == "function" then
+		return parent:IsVisible()
+	end
+
+	return true
+end
+
+function Component:CaptureDrawBounds()
+	rawset(self, "_LastDrawBounds", self:GetDrawBounds())
 end
 
 function Component.new()
