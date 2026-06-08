@@ -1,5 +1,5 @@
-local Component = require("../Primitives/Component")
-local Vector2 = require("../Primitives/Vector2")
+local Component = require("UISDK/Primitives/Component")
+local Vector2 = require("UISDK/Primitives/Vector2")
 
 local Screen = {}
 Screen.__index = Screen

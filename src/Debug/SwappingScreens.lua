@@ -1,6 +1,6 @@
 return function(window)
-	local Runtime = require("../Runtime")
-	local Vector2 = require("../Primitives/Vector2")
+	local Runtime = require("UISDK/Runtime")
+	local Vector2 = require("UISDK/Primitives/Vector2")
 
 	Runtime.new(window or term.current())
 
@@ -17,7 +17,7 @@ return function(window)
 
 	local text2 = Runtime.TextLabel()
 	text2.Text = "This is screen 2!"
-	text2.Color = colors.magenta
+	text2.Color = colors.yellow
 	text2.Position = Vector2.new(1, 1)
 	screen2:Parent(text2)
 

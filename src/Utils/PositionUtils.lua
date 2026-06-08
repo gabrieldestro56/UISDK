@@ -1,4 +1,4 @@
-local Runtime = require("../Runtime")
+local Runtime = require("UISDK/Runtime")
 local PositionUtils = {}
 
 function PositionUtils.getCenterOfScreen(runtime)

@@ -1,5 +1,5 @@
-local Screen = require("./Components/Screen")
-local TextLabel = require("./Components/TextLabel")
+local Screen = require("UISDK/Components/Screen")
+local TextLabel = require("UISDK/Components/TextLabel")
 
 local Runtime = {}
 Runtime.__index = Runtime
