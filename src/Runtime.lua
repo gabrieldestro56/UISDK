@@ -1,5 +1,6 @@
 local Screen = require("UISDK/Components/Screen")
 local TextLabel = require("UISDK/Components/TextLabel")
+local Frame = require("UISDK/Components/Frame")
 
 local Runtime = {}
 Runtime.__index = Runtime
@@ -38,6 +39,10 @@ local function clearBounds(target, bounds)
 
 	if startX > endX or startY > endY then
 		return
+	end
+
+	if type(target.setBackgroundColor) == "function" then
+		target.setBackgroundColor(32768) -- colors.black
 	end
 
 	local blankLine = string.rep(" ", endX - startX + 1)
@@ -119,9 +124,14 @@ end
 local componentRegistry = {
 	Screen = Screen,
 	TextLabel = TextLabel,
+	Frame = Frame,
 }
 
 function Runtime.create(componentType, props, children)
+	if type(componentType) == "function" then
+		return componentType(props, children)
+	end
+
 	local class = componentRegistry[componentType]
 	assert(class, "Unknown component type: " .. tostring(componentType))
 
@@ -157,6 +167,10 @@ end
 
 function Runtime.Clear(runtime)
 	local target = resolveRuntime(runtime).Target
+
+	if type(target.setBackgroundColor) == "function" then
+		target.setBackgroundColor(32768) -- colors.black
+	end
 
 	if type(target.clear) == "function" then
 		target.clear()
@@ -249,6 +263,19 @@ function Runtime.Draw(runtimeOrScreen, maybeScreen)
 
 	if not success then
 		error(drawError, 0)
+	end
+end
+
+function Runtime.state(initial)
+	local runtime = resolveRuntime()
+	local value = initial
+
+	return function()
+		return value
+	end, function(newValue)
+		if value == newValue then return end
+		value = newValue
+		runtime:Invalidate(nil)
 	end
 end
 

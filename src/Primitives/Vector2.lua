@@ -10,4 +10,14 @@ function Vector2.new(x, y)
 	return self
 end
 
+function Vector2.fromScale(x, y)
+	local self = setmetatable({}, Vector2)
+
+	self.X = x or 0
+	self.Y = y or 0
+	self.IsScale = true
+
+	return self
+end
+
 return Vector2

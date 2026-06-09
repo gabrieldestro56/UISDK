@@ -25,7 +25,11 @@ end
 local function getProperty(self, key)
 	local properties = rawget(self, "_Properties")
 	if properties and properties[key] ~= nil then
-		return properties[key]
+		local value = properties[key]
+		if type(value) == "function" then
+			return value()
+		end
+		return value
 	end
 
 	return rawget(self, key)
@@ -98,11 +102,21 @@ function Component:GetAbsolutePosition()
 	local anchorPoint = self.AnchorPoint or Vector2.new()
 	local size = self:GetSize()
 	local parent = getProperty(self, "Parent")
+
+	local resolvedX = position.X
+	local resolvedY = position.Y
+
+	if position.IsScale and parent and type(parent.GetSize) == "function" then
+		local parentSize = parent:GetSize()
+		resolvedX = math.floor(parentSize.X * position.X)
+		resolvedY = math.floor(parentSize.Y * position.Y)
+	end
+
 	local anchorOffset = Vector2.new(
 		math.floor(size.X * anchorPoint.X),
 		math.floor(size.Y * anchorPoint.Y)
 	)
-	local anchoredPosition = Vector2.new(position.X - anchorOffset.X, position.Y - anchorOffset.Y)
+	local anchoredPosition = Vector2.new(resolvedX - anchorOffset.X, resolvedY - anchorOffset.Y)
 
 	if parent and type(parent.GetAbsolutePosition) == "function" then
 		local parentPosition = parent:GetAbsolutePosition()

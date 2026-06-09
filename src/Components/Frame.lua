@@ -1,0 +1,119 @@
+local Component = require("UISDK/Primitives/Component")
+local Vector2 = require("UISDK/Primitives/Vector2")
+
+local Frame = {}
+Frame.__index = Component.CreateIndex(Frame)
+Frame.__newindex = Component.__newindex
+
+setmetatable(Frame, {
+	__index = Component,
+})
+
+local function fillRect(target, x1, y1, x2, y2, color)
+	target.setBackgroundColor(color)
+	local row = string.rep(" ", x2 - x1 + 1)
+	for y = y1, y2 do
+		target.setCursorPos(x1, y)
+		target.write(row)
+	end
+end
+
+local function drawOutline(target, x1, y1, x2, y2, color)
+	target.setBackgroundColor(color)
+	local row = string.rep(" ", x2 - x1 + 1)
+	target.setCursorPos(x1, y1)
+	target.write(row)
+	if y2 ~= y1 then
+		target.setCursorPos(x1, y2)
+		target.write(row)
+	end
+	for y = y1 + 1, y2 - 1 do
+		target.setCursorPos(x1, y)
+		target.write(" ")
+		if x2 ~= x1 then
+			target.setCursorPos(x2, y)
+			target.write(" ")
+		end
+	end
+end
+
+function Frame:GetSize()
+	return self.Size or Vector2.new(0, 0)
+end
+
+function Frame:Parent(component)
+	table.insert(self.Children, component)
+	component.Parent = self
+end
+
+function Frame:Unparent(component)
+	for i = #self.Children, 1, -1 do
+		if self.Children[i].Id == component.Id then
+			self.Children[i].Parent = nil
+			table.remove(self.Children, i)
+		end
+	end
+end
+
+function Frame:Draw(target)
+	if not self:IsVisible() then
+		return
+	end
+
+	local pos = self:GetAbsolutePosition()
+	local size = self:GetSize()
+
+	local x1 = pos.X
+	local y1 = pos.Y
+	local x2 = pos.X + size.X - 1
+	local y2 = pos.Y + size.Y - 1
+
+	if self.BackgroundTransparency < 1 then
+		fillRect(target, x1, y1, x2, y2, self.BackgroundColor)
+	end
+
+	local border = self.BorderRadius
+	if border > 0 then
+		for i = 0, border - 1 do
+			drawOutline(target, x1 + i, y1 + i, x2 - i, y2 - i, self.BorderColor)
+		end
+	end
+
+	for _, child in ipairs(self.Children) do
+		local isVisible = child.Visible
+		if type(child.IsVisible) == "function" then
+			isVisible = child:IsVisible()
+		end
+		if isVisible and type(child.Draw) == "function" then
+			child:Draw(target)
+			if type(child.CaptureDrawBounds) == "function" then
+				child:CaptureDrawBounds()
+			end
+		end
+	end
+end
+
+function Frame.new()
+	local self = Component.new()
+	setmetatable(self, Frame)
+	rawset(self, "_SuppressInvalidation", true)
+
+	self.Name = "Frame"
+	self.Visible = true
+	self.Size = Vector2.new(10, 5)
+	self.Position = Vector2.new(1, 1)
+	self.AnchorPoint = Vector2.new(0, 0)
+
+	self.BorderRadius = 0
+	self.BorderColor = colors and colors.white or 1
+	self.BackgroundTransparency = 0
+	self.BackgroundColor = colors and colors.gray or 8
+
+	self.Children = {}
+
+	rawset(self, "_SuppressInvalidation", nil)
+
+	return self
+end
+
+return Frame
