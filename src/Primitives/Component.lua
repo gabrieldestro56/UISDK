@@ -97,7 +97,7 @@ function Component:GetAbsolutePosition()
 	local position = self.Position or Vector2.new()
 	local anchorPoint = self.AnchorPoint or Vector2.new()
 	local size = self:GetSize()
-	local parent = self.Parent
+	local parent = getProperty(self, "Parent")
 	local anchorOffset = Vector2.new(
 		math.floor(size.X * anchorPoint.X),
 		math.floor(size.Y * anchorPoint.Y)
