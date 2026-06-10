@@ -38,15 +38,26 @@ local function drawOutline(target, x1, y1, x2, y2, color)
 end
 
 function Frame:GetSize()
-	return self.Size or Vector2.new(0, 0)
+	local size = self.Size or Vector2.new(0, 0)
+	if size.IsScale then
+		local parent = self.Parent
+		if parent and type(parent.GetSize) == "function" then
+			local parentSize = parent:GetSize()
+			return Vector2.new(
+				math.floor(parentSize.X * size.X),
+				math.floor(parentSize.Y * size.Y)
+			)
+		end
+	end
+	return size
 end
 
-function Frame:Parent(component)
+function Frame:AddChild(component)
 	table.insert(self.Children, component)
 	component.Parent = self
 end
 
-function Frame:Unparent(component)
+function Frame:RemoveChild(component)
 	for i = #self.Children, 1, -1 do
 		if self.Children[i].Id == component.Id then
 			self.Children[i].Parent = nil
@@ -68,7 +79,7 @@ function Frame:Draw(target)
 	local x2 = pos.X + size.X - 1
 	local y2 = pos.Y + size.Y - 1
 
-	if self.BackgroundTransparency < 1 then
+	if self.BackgroundEnabled then
 		fillRect(target, x1, y1, x2, y2, self.BackgroundColor)
 	end
 
@@ -85,12 +96,20 @@ function Frame:Draw(target)
 			isVisible = child:IsVisible()
 		end
 		if isVisible and type(child.Draw) == "function" then
+			if self.BackgroundEnabled then
+				target.setBackgroundColor(self.BackgroundColor)
+			else
+				target.setBackgroundColor(32768)
+			end
 			child:Draw(target)
 			if type(child.CaptureDrawBounds) == "function" then
 				child:CaptureDrawBounds()
 			end
 		end
 	end
+
+	target.setBackgroundColor(32768)
+	target.setTextColor(1)
 end
 
 function Frame.new()
@@ -106,7 +125,7 @@ function Frame.new()
 
 	self.BorderRadius = 0
 	self.BorderColor = colors and colors.white or 1
-	self.BackgroundTransparency = 0
+	self.BackgroundEnabled = true
 	self.BackgroundColor = colors and colors.gray or 8
 
 	self.Children = {}

@@ -36,10 +36,10 @@ return function(window)
 		Visible = true,
 	})
 
-	frame:Parent(label)
+	frame:AddChild(label)
 
 	local screen = e("Screen", { Visible = true })
-	screen:Parent(frame)
+	screen:AddChild(frame)
 
 	local w, h = Runtime.GetSize()
 	local x, y = 1, 1

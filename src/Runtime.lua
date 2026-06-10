@@ -68,6 +68,46 @@ local function isComponentVisible(component)
 	return component.Visible
 end
 
+local function hitTest(component, x, y, results)
+	if not component:IsVisible() then
+		return
+	end
+
+	local bounds = rawget(component, "_LastDrawBounds")
+	if bounds then
+		if x >= bounds.X and x < bounds.X + bounds.Width
+		and y >= bounds.Y and y < bounds.Y + bounds.Height then
+			table.insert(results, component)
+		end
+	end
+
+	local props = rawget(component, "_Properties")
+	local children = props and props["Children"]
+	if children then
+		for _, child in ipairs(children) do
+			hitTest(child, x, y, results)
+		end
+	end
+end
+
+local function findClickTarget(runtime, x, y)
+	local results = {}
+	for _, screen in ipairs(runtime.Screens) do
+		if screen.Visible then
+			hitTest(screen, x, y, results)
+		end
+	end
+	for i = #results, 1, -1 do
+		local comp = results[i]
+		local props = rawget(comp, "_Properties")
+		local onClick = props and props["OnClick"]
+		if type(onClick) == "function" then
+			return comp, onClick
+		end
+	end
+	return nil, nil
+end
+
 function Runtime.new(target)
 	validateTarget(target)
 
@@ -83,6 +123,9 @@ function Runtime.new(target)
 	self.AutoDraw = true
 	self.Dirty = false
 	self._IsDrawing = false
+	self._Hooks = {}
+	self._Hz = 20
+	self._TimerId = nil
 
 	runtimesByTarget[target] = self
 	currentRuntime = self
@@ -144,7 +187,7 @@ function Runtime.create(componentType, props, children)
 		end
 	end
 
-	if children and type(instance.Parent) == "function" then
+	if children and type(instance.AddChild) == "function" then
 		for key, child in pairs(children) do
 			if type(key) == "string" then
 				local p = rawget(child, "_Properties")
@@ -152,7 +195,7 @@ function Runtime.create(componentType, props, children)
 					p["Name"] = key
 				end
 			end
-			instance:Parent(child)
+			instance:AddChild(child)
 		end
 	end
 
@@ -277,6 +320,61 @@ function Runtime.state(initial)
 		value = newValue
 		runtime:Invalidate(nil)
 	end
+end
+
+function Runtime:SetHz(hz)
+	resolveRuntime(self)._Hz = hz
+end
+
+function Runtime:AddHook(fn)
+	table.insert(resolveRuntime(self)._Hooks, fn)
+end
+
+function Runtime:RemoveHook(fn)
+	local hooks = resolveRuntime(self)._Hooks
+	for i = #hooks, 1, -1 do
+		if hooks[i] == fn then
+			table.remove(hooks, i)
+		end
+	end
+end
+
+function Runtime:Run()
+	local runtime = resolveRuntime(self)
+	runtime._TimerId = os.startTimer(1 / runtime._Hz)
+
+	while true do
+		local event, p1, p2, p3 = os.pullEventRaw()
+
+		if event == "terminate" then
+			break
+		end
+
+		local hooks = { unpack(runtime._Hooks) }
+
+		if event == "timer" and p1 == runtime._TimerId then
+			runtime._TimerId = os.startTimer(1 / runtime._Hz)
+			for _, hook in ipairs(hooks) do
+				hook("tick")
+			end
+
+		elseif event == "mouse_click" or event == "monitor_touch" then
+			local _, fn = findClickTarget(runtime, p2, p3)
+			if fn then
+				fn(p2, p3)
+			end
+			for _, hook in ipairs(hooks) do
+				hook(event, p1, p2, p3)
+			end
+
+		else
+			for _, hook in ipairs(hooks) do
+				hook(event, p1, p2, p3)
+			end
+		end
+	end
+
+	runtime._TimerId = nil
 end
 
 return Runtime

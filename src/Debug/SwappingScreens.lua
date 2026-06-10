@@ -3,7 +3,7 @@ return function(window)
 	local Vector2 = require("UISDK/Primitives/Vector2")
 	local e = Runtime.create
 
-	Runtime.new(window or term.current())
+	local rt = Runtime.new(window or term.current())
 
 	local screen1 = e("Screen", { Visible = true }, {
 		Text = e("TextLabel", {
@@ -21,13 +21,19 @@ return function(window)
 		})
 	})
 
-	for i = 1, 10 do
-		screen1.Visible = true
-		screen2.Visible = false
-		sleep(1)
+	local tickCount = 0
+	rt:AddHook(function(event)
+		if event ~= "tick" then
+			return
+		end
+		tickCount = tickCount + 1
+		if tickCount >= rt._Hz then
+			tickCount = 0
+			screen1.Visible = not screen1.Visible
+			screen2.Visible = not screen2.Visible
+		end
+	end)
 
-		screen1.Visible = false
-		screen2.Visible = true
-		sleep(1)
-	end
+	rt:SetHz(20)
+	rt:Run()
 end

@@ -9,12 +9,12 @@ setmetatable(Screen, {
 	__index = Component,
 })
 
-function Screen:Parent(component)
+function Screen:AddChild(component)
 	table.insert(self.Children, component)
 	component.Parent = self
 end
 
-function Screen:Unparent(component)
+function Screen:RemoveChild(component)
 	for i = #self.Children, 1, -1 do
 		if self.Children[i].Id == component.Id then
 			self.Children[i].Parent = nil
