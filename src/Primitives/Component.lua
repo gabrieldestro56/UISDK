@@ -182,6 +182,8 @@ function Component.new()
 	self.Position = Vector2.new(1, 1)
 	self.AnchorPoint = Vector2.new(0, 0)
 	self.Parent = nil
+	self.ZIndex = 0
+	self.LayoutOrder = 0
 
 	self.Id = math.random(1, 999999999)
 

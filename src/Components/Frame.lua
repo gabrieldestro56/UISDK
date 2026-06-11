@@ -84,13 +84,32 @@ function Frame:Draw(target)
 	end
 
 	local border = self.BorderRadius
-	if border > 0 then
+	if self.BorderEnabled and border > 0 then
 		for i = 0, border - 1 do
 			drawOutline(target, x1 + i, y1 + i, x2 - i, y2 - i, self.BorderColor)
 		end
 	end
 
 	for _, child in ipairs(self.Children) do
+		if type(child.ApplyLayout) == "function" then
+			child:ApplyLayout(self)
+			break
+		end
+	end
+
+	local sorted = {}
+	for i, child in ipairs(self.Children) do
+		sorted[i] = { child = child, i = i }
+	end
+	table.sort(sorted, function(a, b)
+		local az = a.child.ZIndex or 0
+		local bz = b.child.ZIndex or 0
+		if az ~= bz then return az < bz end
+		return a.i < b.i
+	end)
+
+	for _, entry in ipairs(sorted) do
+		local child = entry.child
 		local isVisible = child.Visible
 		if type(child.IsVisible) == "function" then
 			isVisible = child:IsVisible()
@@ -123,6 +142,7 @@ function Frame.new()
 	self.Position = Vector2.new(1, 1)
 	self.AnchorPoint = Vector2.new(0, 0)
 
+	self.BorderEnabled = false
 	self.BorderRadius = 0
 	self.BorderColor = colors and colors.white or 1
 	self.BackgroundEnabled = true

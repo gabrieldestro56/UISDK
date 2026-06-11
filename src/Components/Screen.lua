@@ -44,7 +44,19 @@ function Screen:Draw(target)
 
 	assert(drawTarget ~= nil, "Screen:Draw requires a terminal or monitor target")
 
-	for _, component in ipairs(self.Children) do
+	local sorted = {}
+	for i, child in ipairs(self.Children) do
+		sorted[i] = { child = child, i = i }
+	end
+	table.sort(sorted, function(a, b)
+		local az = a.child.ZIndex or 0
+		local bz = b.child.ZIndex or 0
+		if az ~= bz then return az < bz end
+		return a.i < b.i
+	end)
+
+	for _, entry in ipairs(sorted) do
+		local component = entry.child
 		local isVisible = component.Visible
 		if type(component.IsVisible) == "function" then
 			isVisible = component:IsVisible()

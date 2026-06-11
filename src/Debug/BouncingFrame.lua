@@ -45,7 +45,9 @@ return function(window)
 	local x, y = 1, 1
 	local dx, dy = 1, 1
 
-	while true do
+	rt:AddHook(function(event)
+		if event ~= "tick" then return end
+
 		x = x + dx
 		y = y + dy
 
@@ -79,6 +81,8 @@ return function(window)
 		end
 
 		Runtime.Draw(rt)
-		sleep(0.05)
-	end
+	end)
+
+	rt:SetHz(20)
+	rt:Run()
 end

@@ -1,6 +1,7 @@
 local Screen = require("UISDK/Components/Screen")
 local TextLabel = require("UISDK/Components/TextLabel")
 local Frame = require("UISDK/Components/Frame")
+local UIListLayout = require("UISDK/Components/UIListLayout")
 
 local Runtime = {}
 Runtime.__index = Runtime
@@ -168,6 +169,7 @@ local componentRegistry = {
 	Screen = Screen,
 	TextLabel = TextLabel,
 	Frame = Frame,
+	UIListLayout = UIListLayout,
 }
 
 function Runtime.create(componentType, props, children)
@@ -339,11 +341,16 @@ function Runtime:RemoveHook(fn)
 	end
 end
 
+function Runtime:Stop()
+	rawset(resolveRuntime(self), "_ShouldStop", true)
+end
+
 function Runtime:Run()
 	local runtime = resolveRuntime(self)
+	rawset(runtime, "_ShouldStop", false)
 	runtime._TimerId = os.startTimer(1 / runtime._Hz)
 
-	while true do
+	while not rawget(runtime, "_ShouldStop") do
 		local event, p1, p2, p3 = os.pullEventRaw()
 
 		if event == "terminate" then
@@ -374,7 +381,9 @@ function Runtime:Run()
 		end
 	end
 
+	rawset(runtime, "_ShouldStop", false)
 	runtime._TimerId = nil
+	Runtime.Clear(runtime)
 end
 
 return Runtime

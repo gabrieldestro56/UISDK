@@ -11,6 +11,10 @@ local dependencies = {
 
 	-- Components
 	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Components/Frame.lua",
+		path = "UISDK/Components/Frame",
+	},
+	{
 		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Components/Screen.lua",
 		path = "UISDK/Components/Screen",
 	},
@@ -18,8 +22,32 @@ local dependencies = {
 		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Components/TextLabel.lua",
 		path = "UISDK/Components/TextLabel",
 	},
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Components/UIListLayout.lua",
+		path = "UISDK/Components/UIListLayout",
+	},
 
 	-- Debug
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Debug/BouncingFrame.lua",
+		path = "UISDK/Debug/BouncingFrame",
+	},
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Debug/CenteredLabel.lua",
+		path = "UISDK/Debug/CenteredLabel",
+	},
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Debug/Counter.lua",
+		path = "UISDK/Debug/Counter",
+	},
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Debug/ListLayout.lua",
+		path = "UISDK/Debug/ListLayout",
+	},
+	{
+		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Debug/Menu.lua",
+		path = "UISDK/Debug/Menu",
+	},
 	{
 		url = "https://raw.githubusercontent.com/gabrieldestro56/UISDK/refs/heads/main/src/Debug/SwappingScreens.lua",
 		path = "UISDK/Debug/SwappingScreens",
