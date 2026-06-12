@@ -304,7 +304,12 @@ local function download(dep)
 		fs.makeDir(dir)
 	end
 
-	local file = fs.open(dep.path, "w")
+	-- Older installs wrote extensionless files require() can't find; clean them up.
+	if fs.exists(dep.path) and not fs.isDir(dep.path) then
+		fs.delete(dep.path)
+	end
+
+	local file = fs.open(dep.path .. ".lua", "w")
 	file.write(content)
 	file.close()
 end
